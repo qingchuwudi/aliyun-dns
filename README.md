@@ -28,8 +28,8 @@
 - `accessKeySecret`: 与 `accessKeyId` 对应的授权密钥
 - `ipv4_check_url`: 通过该URL获取网络的IPv4地址, 当前仅支持返回IP的URL，返回json或其它复杂数据结构无法处理
 - `ipv6_check_url`: 通过该URL获取网络的IPv6地址, 当前仅支持返回IP的URL，返回json或其它复杂数据结构无法处理
-- `ttl`: 域名的TTL时间，从阿里云后台查询，普通域名是 600
-- `interval`: 公网IP检测时间间隔，单位秒(s)
+- `ttl`: 域名的TTL，从阿里云后台查询，普通域名是 600
+- `interval`: 公网IP检测周期，单位秒(s)
 - `customer`:
     + `domain`: 主域名（如果要更新的域名是 `dns.aliyuncs.com`，那么`aliyuncs.com` 是主域名，`dns` 是子域名前缀）
     + `ipv4_rr`: IPv4地址对应的 **子域名前缀**
@@ -38,7 +38,8 @@
 ### 1.2、配置注意事项
 
 - 1、 `ipv4_check_url` 和 `ipv6_check_url` 用来获取本机的公网IP，不写则不使用对应项，**至少配置一个**。
-- 2、 允许配置多个域名，在 `customer` 下配置多个域名时，会自动更新这些域名的解析记录。
+- 2、 `ipv4_rr` 和 `ipv6_rr` 不写则不使用对应项，**至少配置一个**。
+- 3、 允许配置多个域名，在 `customer` 下配置多个域名时，会自动更新这些域名的解析记录。
 
 ### 1.3、阿里云授权
 
@@ -53,6 +54,7 @@
 ```
 git clone https://github.com/qingchuwudi/aliyun-dns
 cd aliyun-dns
+go build .
 ./aliyun-dns -c config.yaml
 ```
 
