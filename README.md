@@ -7,7 +7,8 @@
 - [x] 支持指定配置文件
 - [x] 支持IPv4和IPv6同时更新
 - [x] 支持多域名
-- [ ] 支持宽带多拨
+- [x] 支持宽带有多个公网IP，或者有多个宽带的情景（比如宽带多拨）
+- [x] 支持缓存，减少网络请求
 - [x] 支持自定义TTL
 - [x] 支持自定义IP检测周期
 - [x] 支持Docker
@@ -30,6 +31,12 @@
 - `ipv6_check_url`: 通过该URL获取网络的IPv6地址, 当前仅支持返回IP的URL，返回json或其它复杂数据结构无法处理
 - `ttl`: 域名的TTL，从阿里云后台查询，普通域名是 600
 - `interval`: 公网IP检测周期，单位秒(s)
+- `broadband_retry`: 重复次数
+
+    不能小于宽带多拨情景下的宽带数量（可能会出现的公网IP数量），如果配置了负载均衡，还要保证数量能覆盖到所有宽带（负载均衡的最小公倍数）。
+  
+- `cache`: 是否(true/false)启用IP缓存，建议启动
+    启用IP缓存的情况下，检查IP时不会在阿里云获取当前域名的解析记录，缓存命中则不更新，不命中则表示IP变动需要更新。可以有效减少网络请求。
 - `customer`:
     + `domain`: 主域名（如果要更新的域名是 `dns.aliyuncs.com`，那么`aliyuncs.com` 是主域名，`dns` 是子域名前缀）
     + `ipv4_rr`: IPv4地址对应的 **子域名前缀**
@@ -61,16 +68,18 @@ go build .
 ### 2.2、Docker运行
 
 ```bash
-docker run --name=aliyun-dns --restart=unless-stopped --net=host -v /etc/alidns-config.yaml:/etc/config.yaml -d qingchuwudi/aliyun-dns:v1.0.0
+docker run --name=aliyun-dns --restart=unless-stopped --net=host -v /etc/alidns-config.yaml:/etc/config.yaml -d qingchuwudi/aliyun-dns:v1.1.0
 ```
 
 **注意：** 
 - 1、要使用 `--net=host` 网络模式启动，和宿主机使用同一个网络，这样可以保证获取的IP与宿主机一致。
+
   参考资料 [Docker 网络:host模式][2]
 - 2、修改配置文件以后，重启docker生效：`docker restart aliyun-dns`。
 - 3、支持多种不同架构环境下运行：**amd64(即x86_64)**、**386（即x86）**、**arm64**、**arm/v7**。
 
 > Docker使用桥接或者其它网络模式运行时，Docker内的IPv6和主机真实的IPv6不一定相同。
+> 
 > 因为国内IPv4是路由下面的DHCP，但是观察发现IPv6是为局域网环境中每个主机分配一个公网IPv6地址，并不是一个宽带使用一个IPv6地址。
 
 _ _ _
