@@ -66,13 +66,13 @@ func run(config *myConfig.Config, cli *alidns.Client) {
 
 	// 更新所有用户配置
 	for _, customer := range config.Customer {
-		if PubIPv4 != nil {
+		if (PubIPv4 != nil) && (customer.IPv4RR != "") {
 			err := updateDomains(cli, config, nil, customer.IPv4RR, customer.Domain, *PubIPv4, myConfig.IPv4Type, config.TTL)
 			if err != nil {
 				fmt.Printf("update IPv4 failed : %s\r\n", err.Error())
 			}
 		}
-		if PubIPv6 != nil {
+		if (PubIPv6 != nil) && (customer.IPv6RR != "") {
 			err := updateDomains(cli, config, nil, customer.IPv6RR, customer.Domain, *PubIPv6, myConfig.IPv6Type, config.TTL)
 			if err != nil {
 				fmt.Printf("update IPv6 failed : %s\r\n", err.Error())
