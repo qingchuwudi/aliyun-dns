@@ -67,10 +67,10 @@ func InitLogger(logPath, filename string) {
 
 	hook := lumberjack.Logger{
 		Filename:   logfile, // 日志文件路径
-		MaxSize:    128,     // 每个日志文件保存的大小 单位:M
+		MaxSize:    16,     // 每个日志文件保存的大小 单位:M
 		MaxAge:     7,       // 文件最多保存多少天
-		MaxBackups: 30,      // 日志文件最多保存多少个备份
-		Compress:   false,   // 是否压缩
+		MaxBackups: 10,      // 日志文件最多保存多少个备份
+		Compress:   true,   // 是否压缩
 	}
 
 	var writes = []zapcore.WriteSyncer{zapcore.AddSync(&hook)}
