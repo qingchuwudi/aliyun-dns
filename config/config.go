@@ -16,12 +16,10 @@ limitations under the License.
 package config
 
 import (
-	"errors"
-	"fmt"
-	alidns "github.com/alibabacloud-go/alidns-20150109/client"
 	"io/ioutil"
-	"net/http"
-	"strings"
+
+	"aliyun-dns/module/filecheck"
+	"aliyun-dns/module/loger"
 	"gopkg.in/yaml.v2"
 )
 
@@ -31,19 +29,22 @@ const (
 	AliyunDNS = "dns.aliyuncs.com" // 修改DNS的API地址
 )
 
+// ------------------------------------------------------------------------
+//
+// ------------------------------------------------------------------------
+
 // 配置文件
 type Config struct {
-	AccessKeyId     string `yaml:"accessKeyId"`
-	AccessKeySecret string `yaml:"accessKeySecret"`
-	TTL             int64  `yaml:"ttl"`
-	IPv4            string `yaml:"ipv4_check_url"`
-	IPv6            string `yaml:"ipv6_check_url"`
-	Interval        int    `yaml:"interval"`
-	BroadbandRetry  int8   `yaml:"broadband_retry"`
-	UseCache        bool   `yaml:"cache"`
+	AccessKeyId     string     `yaml:"accessKeyId"`
+	AccessKeySecret string     `yaml:"accessKeySecret"`
+	LogPath         string     `yaml:"log_path"`
+	TTL             int64      `yaml:"ttl"`
+	IPv4            string     `yaml:"ipv4_check_url"`
+	IPv6            string     `yaml:"ipv6_check_url"`
+	Interval        int        `yaml:"interval"`
+	BroadbandRetry  int8       `yaml:"broadband_retry"`
+	UseCache        bool       `yaml:"cache"`
 	Customer        []Customer `yaml:"customer"`
-	IPsCache        map[string]string
-	RecordIds       map[string]string // 记录DNS的recordID
 }
 
 type Customer struct {
@@ -52,31 +53,30 @@ type Customer struct {
 	IPv6RR string `yaml:"ipv6_rr"`
 }
 
-func (c *Config) InitConfig(file string) error {
+// 从配置文件加载配置
+func (c *Config) LoadConfig(file string) (success bool) {
 	yamlFile, err := ioutil.ReadFile(file)
 	if err != nil {
-		return err
+		loger.PreError(err.Error())
+		return false
 	}
 
 	err = yaml.Unmarshal(yamlFile, c)
 	if err != nil {
-		return err
+		loger.PreError(err.Error())
+		return false
 	}
-	// 检查
+	// log
+	if !(c.LogPath == "" || filecheck.IsDir(c.LogPath)) {
+		loger.PreError("日志路径(log_path)配置有误：路径不存在或没有权限！")
+		return false
+	}
+	// 检查 ip
 	if (c.IPv4 == "") && (c.IPv6 == "") {
-		return errors.New("It has at least one value of 'ipv4_check_url' and 'ipv6_check_url' in config.yaml.")
+		loger.PreError("'ipv4_check_url' 和 'ipv6_check_url' 至少配置一个！")
+		return false
 	}
-
-	// 缓存处理
-	if c.UseCache {
-		c.IPsCache = make(map[string]string)
-		c.RecordIds = make(map[string]string)
-	} else {
-		c.IPsCache = nil
-		c.RecordIds = nil
-	}
-
-	return nil
+	return true
 }
 
 // 初始化
@@ -85,122 +85,4 @@ func (c *Config) InitBroadbandRecords() map[string]bool {
 		return make(map[string]bool, c.BroadbandRetry)
 	}
 	return nil
-}
-
-// 初始化IP缓存
-func (c *Config) InitCache(cli *alidns.Client) {
-	if !c.UseCache {
-		fmt.Println("Cache is OFF and will not be used.")
-		return
-	}
-	for _, customer := range c.Customer {
-		if (customer.IPv4RR != "") || (c.IPv4 != "") {
-			subDomain := customer.IPv4RR + "." + customer.Domain
-			c.subDomainRecordsToCache(cli, &subDomain)
-		}
-		if (customer.IPv6RR != "") || (c.IPv6 != "") {
-			subDomain := customer.IPv6RR + "." + customer.Domain
-			c.subDomainRecordsToCache(cli, &subDomain)
-		}
-	}
-}
-
-// 查询DNS记录并更新到缓存
-func (c *Config) subDomainRecordsToCache(cli *alidns.Client, subDomain *string) {
-	subDomainRequest := &alidns.DescribeSubDomainRecordsRequest{
-		SubDomain: subDomain,
-	}
-	subDomainRecords, err := cli.DescribeSubDomainRecords(subDomainRequest)
-	if err == nil {
-		// 获取域名解析记录，更新缓存
-		for _, record := range subDomainRecords.Body.DomainRecords.Record {
-			// www.yourdomain.com#A => 127.0.0.1
-			// www.yourdomain.com#AAAA => ::1
-			cacheKey := CacheKey(subDomain,record.Type)
-			c.IPsCache[cacheKey] = *record.Value
-			c.RecordIds[cacheKey] = *record.RecordId
-		}
-	}
-}
-
-func PublilcIPs(IPv4CheckUrl, IPv6CheckUrl string) (PubIPv4, PubIPv6 *string) {
-	PubIPv4, PubIPv6 = nil, nil
-	if IPv4CheckUrl != "" {
-		PubIPv4 = GetPublishIP(IPv4CheckUrl)
-	}
-	if IPv6CheckUrl != "" {
-		PubIPv6 = GetPublishIP(IPv6CheckUrl)
-	}
-	return PubIPv4, PubIPv6
-}
-
-func MultiBroadbandPublicIPs(IPv4CheckUrl, IPv6CheckUrl string, broadbandRetry int8) (map[string]bool, map[string]bool) {
-	if broadbandRetry < 2 {
-		return nil, nil
-	}
-
-	broadbandIPv4 := make(map[string]bool, 0)
-	broadbandIPv6 := make(map[string]bool, 0)
-
-	for i := int8(0); i < broadbandRetry; i++ {
-		pubIPv4, pubIPv6 := PublilcIPs(IPv4CheckUrl, IPv6CheckUrl)
-		if pubIPv4 != nil {
-			broadbandIPv4[*pubIPv4] = true
-		}
-		if pubIPv6 != nil {
-			broadbandIPv6[*pubIPv6] = true
-		}
-	}
-	if len(broadbandIPv4) == 0 {
-		broadbandIPv4 = nil
-	}
-	if len(broadbandIPv6) == 0 {
-		broadbandIPv6 = nil
-	}
-	return broadbandIPv4, broadbandIPv6
-}
-
-func BroadbandIPFisrt(broadbandIPs map[string]bool) string {
-	for broadbandIP := range broadbandIPs {
-		return broadbandIP
-	}
-	return ""
-}
-
-func GetPublishIP(IPCheckUrl string) *string {
-	resp, err := http.Get("http://" + IPCheckUrl)
-	if err != nil {
-		fmt.Printf("公网IP查询失败 ：%s\r\n", err.Error())
-		return nil
-	}
-	defer resp.Body.Close()
-	content, _ := ioutil.ReadAll(resp.Body)
-	ip1 := strings.Replace(string(content), "\n", "", -1)
-	ip2 := strings.Replace(ip1, "\r", "", -1)
-	return &ip2
-}
-
-func CacheKey(subDomain, ipType *string) string {
-	return (*subDomain + "#" + *ipType)
-}
-
-// 判断ip是否发生变动
-func DoesIPChanged(config *Config, broadbandIP map[string]bool, cacheKey, oldIP, newIP string) bool {
-	if config.BroadbandRetry > 1 {
-		if config.UseCache {
-			// 缓存中的IP出现在本次公网查询结果，保持解析记录不变
-			return broadbandIP[config.IPsCache[cacheKey]]
-		} else {
-			// 正在使用的IP命中查询结果集
-			return broadbandIP[oldIP]
-		}
-	} else {
-		if config.UseCache {
-			// IP在缓存中，IP 没有发生变化，不做任何操作
-			return config.IPsCache[cacheKey] == newIP
-		} else {
-			// IP 没有发生变化，不做任何操作
-			return oldIP == newIP
-		}
-	}
 }
