@@ -16,17 +16,17 @@ limitations under the License.
 package config
 
 import (
-	"io/ioutil"
+    "io/ioutil"
 
-	"aliyun-dns/module/filecheck"
-	"aliyun-dns/module/loger"
-	"gopkg.in/yaml.v2"
+    "aliyun-dns/module/filecheck"
+    "aliyun-dns/module/loger"
+    "gopkg.in/yaml.v2"
 )
 
 const (
-	IPv4Type  = "A"
-	IPv6Type  = "AAAA"
-	AliyunDNS = "dns.aliyuncs.com" // 修改DNS的API地址
+    IPv4Type  = "A"
+    IPv6Type  = "AAAA"
+    AliyunDNS = "dns.aliyuncs.com" // 修改DNS的API地址
 )
 
 // ------------------------------------------------------------------------
@@ -35,54 +35,83 @@ const (
 
 // 配置文件
 type Config struct {
-	AccessKeyId     string     `yaml:"accessKeyId"`
-	AccessKeySecret string     `yaml:"accessKeySecret"`
-	LogPath         string     `yaml:"log_path"`
-	TTL             int64      `yaml:"ttl"`
-	IPv4            string     `yaml:"ipv4_check_url"`
-	IPv6            string     `yaml:"ipv6_check_url"`
-	Interval        int        `yaml:"interval"`
-	BroadbandRetry  int8       `yaml:"broadband_retry"`
-	UseCache        bool       `yaml:"cache"`
-	Customer        []Customer `yaml:"customer"`
+    AccessKeyId     string           `yaml:"accessKeyId"`
+    AccessKeySecret string           `yaml:"accessKeySecret"`
+    Log             *loger.LogConfig `yaml:"log"`
+    TTL             int64            `yaml:"ttl"`
+    IPv4            string           `yaml:"ipv4_check_url"`
+    IPv6            string           `yaml:"ipv6_check_url"`
+    Interval        int              `yaml:"interval"`
+    BroadbandRetry  int8             `yaml:"broadband_retry"`
+    UseCache        bool             `yaml:"cache"`
+    Customer        []Customer       `yaml:"customer"`
+    // IP        map[string]string // 记录阿里云dns的ip
+    // RecordId       map[string]string // 记录阿里云DNS的recordID
 }
 
 type Customer struct {
-	Domain string `yaml:"domain"`
-	IPv4RR string `yaml:"ipv4_rr"`
-	IPv6RR string `yaml:"ipv6_rr"`
+    Domain string `yaml:"domain"`
+    IPv4RR string `yaml:"ipv4_rr"`
+    IPv6RR string `yaml:"ipv6_rr"`
 }
 
 // 从配置文件加载配置
 func (c *Config) LoadConfig(file string) (success bool) {
-	yamlFile, err := ioutil.ReadFile(file)
-	if err != nil {
-		loger.PreError(err.Error())
-		return false
-	}
+    yamlFile, err := ioutil.ReadFile(file)
+    if err != nil {
+        loger.PreError(err.Error())
+        return false
+    }
 
-	err = yaml.Unmarshal(yamlFile, c)
-	if err != nil {
-		loger.PreError(err.Error())
-		return false
-	}
-	// log
-	if !(c.LogPath == "" || filecheck.IsDir(c.LogPath)) {
-		loger.PreError("日志路径(log_path)配置有误：路径不存在或没有权限！")
-		return false
-	}
-	// 检查 ip
-	if (c.IPv4 == "") && (c.IPv6 == "") {
-		loger.PreError("'ipv4_check_url' 和 'ipv6_check_url' 至少配置一个！")
-		return false
-	}
-	return true
+    err = yaml.Unmarshal(yamlFile, c)
+    if err != nil {
+        loger.PreError(err.Error())
+        return false
+    }
+    // log
+    if c.Log == nil {
+        c.Log = &loger.LogConfig{
+            Path:    "",
+            Level:   "debug",
+            Develop: false,
+        }
+    }
+    if !IsLogValid(c.Log) {
+        return false
+    }
+    // 检查 ip
+    if (c.IPv4 == "") && (c.IPv6 == "") {
+        loger.PreError("'ipv4_check_url' 和 'ipv6_check_url' 至少配置一个！")
+        return false
+    }
+
+    // 周期最短5秒
+    if c.Interval < 5 {
+        c.Interval = 5
+    }
+    return true
 }
 
 // 初始化
 func (c *Config) InitBroadbandRecords() map[string]bool {
-	if c.BroadbandRetry > 0 {
-		return make(map[string]bool, c.BroadbandRetry)
-	}
-	return nil
+    if c.BroadbandRetry > 0 {
+        return make(map[string]bool, c.BroadbandRetry)
+    }
+    return nil
+}
+
+// 检查日志配置有效性
+func IsLogValid(l *loger.LogConfig) bool {
+    if !(l.Path == "" || filecheck.IsDir(l.Path)) {
+        loger.PreError("日志路径(%s)配置有误：路径不存在或没有权限！", l.Path)
+        return false
+    }
+    switch l.Level {
+    case "debug", "info", "warn", "error":
+        break
+    default:
+        loger.PreError("日志等级(%s)配置有误", l.Level)
+        return false
+    }
+    return true
 }
