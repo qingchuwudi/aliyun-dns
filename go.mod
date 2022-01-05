@@ -1,12 +1,11 @@
 module aliyun-dns
 
-go 1.15
+go 1.17
 
 require (
 	github.com/alibabacloud-go/alidns-20150109 v1.0.3
 	github.com/alibabacloud-go/darabonba-openapi v0.1.1
 	github.com/alibabacloud-go/tea v1.1.15
-	github.com/antlabs/timer v0.0.5
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	go.uber.org/zap v1.19.1
 	gopkg.in/yaml.v2 v2.4.0
@@ -19,7 +18,6 @@ require (
 	github.com/alibabacloud-go/openapi-util v0.0.6 // indirect
 	github.com/alibabacloud-go/tea-utils v1.3.8 // indirect
 	github.com/aliyun/credentials-go v1.1.2 // indirect
-	github.com/antlabs/stl v0.0.1 // indirect
 	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect

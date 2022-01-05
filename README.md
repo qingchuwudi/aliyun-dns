@@ -27,6 +27,10 @@
 
 - `accessKeyId`: 阿里云的授权ID
 - `accessKeySecret`: 与 `accessKeyId` 对应的授权密钥
+- `log`：日志相关配置
+    + `path`：日志文件保存的路径，例如：`/var/log/`。
+    + `level`：日志记录的最低级别，有 debug,info,warn,error 这四种。例如配置为 info 时就不会记录debug日志。
+    + `develop`：开发者模式，开启后会输出代码文件和堆栈信息。
 - `ipv4_check_url`: 通过该URL获取网络的IPv4地址, 当前仅支持返回IP的URL，返回json或其它复杂数据结构无法处理
 - `ipv6_check_url`: 通过该URL获取网络的IPv6地址, 当前仅支持返回IP的URL，返回json或其它复杂数据结构无法处理
 - `ttl`: 域名的TTL，从阿里云后台查询，普通域名是 600
@@ -34,11 +38,6 @@
 - `broadband_retry`: 重复次数
 
     不能小于宽带多拨情景下的宽带数量（可能会出现的公网IP数量），如果配置了负载均衡，还要保证数量能覆盖到所有宽带（负载均衡的最小公倍数）。
-  
-- ~~`cache`: 是否(true/false)启用IP缓存，建议启动~~
-    ~~启用IP缓存的情况下，检查IP时不会在阿里云获取当前域名的解析记录，缓存命中则不更新，不命中则表示IP变动需要更新。可以有效减少网络请求。~~
-    > 缓存不再是可配置项，必然开启缓存
-
 - `customer`:
     + `domain`: 主域名（如果要更新的域名是 `dns.aliyuncs.com`，那么`aliyuncs.com` 是主域名，`dns` 是子域名前缀）
     + `ipv4_rr`: IPv4地址对应的 **子域名前缀**
@@ -70,7 +69,7 @@ go build .
 ### 2.2、Docker运行
 
 ```bash
-docker run --name=aliyun-dns --restart=unless-stopped --net=host -v /etc/alidns-config.yaml:/etc/config.yaml -d qingchuwudi/aliyun-dns:v2.0.0
+docker run --name=aliyun-dns --restart=unless-stopped --net=host -v /etc/alidns-config.yaml:/etc/config.yaml -d qingchuwudi/aliyun-dns:v2.1.0
 ```
 
 **注意：** 

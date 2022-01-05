@@ -58,7 +58,7 @@ func ParseArgs() (stop bool) {
 		return true
 	}
 	if Ver {
-		fmt.Println("v2.0.0")
+		fmt.Println("v2.1.0")
 		return true
 	}
 	if Cfg == "" {

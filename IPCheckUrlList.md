@@ -4,6 +4,7 @@
 
 - `v4.myip.la`
 - `ipv4.icanhazip.com`
+- `v4.ident.me`
 - `members.3322.org/dyndns/getip`
 - `api-ipv4.ip.sb/ip`
 - `whatismyip.akamai.com/`
@@ -12,6 +13,7 @@
 
 - `v6.myip.la`
 - `ipv6.icanhazip.com`
+- `v6.ident.me`
 - `speed.neu6.edu.cn/getIP.php`
 - `api-ipv6.ip.sb/ip`
 - `v6.ipv6-test.com/api/myip.php`
