@@ -39,7 +39,7 @@ type LocalCache struct {
 }
 
 // 初始化IP缓存
-func (c *LocalCache) Init(cfg *config.Config, cli *alidns.Client) {
+func (c *LocalCache) Init(cfg *config.Config, cli alidns.Client) {
 	//c.current = make(map[string]string)
 	c.IP = make(map[string]string)
 	c.RecordId = make(map[string]string)
@@ -94,7 +94,7 @@ func (c *LocalCache) Del(cacheKey string) {
 }
 
 // 查询DNS记录并更新到缓存
-func (c *LocalCache) RecordsToCache(cli *alidns.Client, subDomain *string) {
+func (c *LocalCache) RecordsToCache(cli alidns.Client, subDomain *string) {
 	subDomainRequest := &alidns.DescribeSubDomainRecordsRequest{
 		SubDomain: subDomain,
 	}

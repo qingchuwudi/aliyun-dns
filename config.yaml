@@ -9,6 +9,7 @@ ipv6_check_url: v6.myip.la #ipv6.icanhazip.com
 ttl: 600
 interval: 60
 broadband_retry: 2
+cache: true
 customer:
   - domain: your_domain.com
     ipv4_rr: subdomain1

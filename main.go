@@ -47,17 +47,18 @@ func main() {
     loger.InitLogger(cfg.Log)
 
     // 创建客户端
-    cli, err := aliddns.CreateClient(tea.String(cfg.AccessKeyId), tea.String(cfg.AccessKeySecret))
+    cliPtr, err := aliddns.CreateClient(tea.String(cfg.AccessKeyId), tea.String(cfg.AccessKeySecret))
     if err != nil {
         loger.Error(err.Error())
         return
     }
+    cli := *cliPtr
 
     // 加载缓存
     myip.CurrentCache.Init(&cfg, cli)
 
     // 根据宽带多拨情况来判断使用哪个函数主体运行
-    var runFunc func(context.Context, *myConfig.Config, *alidns.Client)
+    var runFunc func(context.Context, *myConfig.Config, alidns.Client)
     if cfg.BroadbandRetry < 2 {
         loger.Info("正常DDNS")
         runFunc = aliddns.Run
@@ -72,14 +73,22 @@ func main() {
     }()
     ctxChild, _ := context.WithCancel(ctx)
 
-    interval := time.Second * time.Duration(cfg.Interval)
-    t := time.NewTicker(interval)
+    // 用来整点运行
+    interval := cfg.Interval * 1000
+    t := time.NewTimer(next(interval))
     for {
         select {
         case <-ctx.Done():
             return
-        case _ = <-t.C:
+        case <-t.C:
             runFunc(ctxChild, &cfg, cli)
+            t.Reset(next(interval))
         }
     }
+}
+
+// 用这种方式误差在10ms左右
+// 下次触发定时器的时刻
+func next(interval int64) time.Duration {
+    return time.Duration(interval-(time.Now().UnixMilli()%interval)) * time.Millisecond
 }

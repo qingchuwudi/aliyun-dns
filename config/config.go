@@ -41,7 +41,7 @@ type Config struct {
     TTL             int64            `yaml:"ttl"`
     IPv4            string           `yaml:"ipv4_check_url"`
     IPv6            string           `yaml:"ipv6_check_url"`
-    Interval        int              `yaml:"interval"`
+    Interval        int64            `yaml:"interval"`
     BroadbandRetry  int8             `yaml:"broadband_retry"`
     UseCache        bool             `yaml:"cache"`
     Customer        []Customer       `yaml:"customer"`

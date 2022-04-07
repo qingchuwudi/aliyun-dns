@@ -40,7 +40,7 @@ func CreateClient(accessKeyId, accessKeySecret *string) (*client.Client, error) 
 }
 
 // 正常宽带
-func Run(ctx context.Context, cfg *myConfig.Config, cli *client.Client) {
+func Run(ctx context.Context, cfg *myConfig.Config, cli client.Client) {
     // 查询IP
     PubIPv4, PubIPv6 := myip.PublilcIPs(cfg.IPv4, cfg.IPv6)
 
@@ -67,7 +67,7 @@ func Run(ctx context.Context, cfg *myConfig.Config, cli *client.Client) {
 }
 
 // 宽带多拨或有多条宽带线路
-func RunOnMultiBroadband(ctx context.Context, cfg *myConfig.Config, cli *client.Client) {
+func RunOnMultiBroadband(ctx context.Context, cfg *myConfig.Config, cli client.Client) {
     // 重复获取公网IP
     broadbandIPv4, broadbandIPv6 := myip.MultiBroadbandPublicIPs(cfg.IPv4, cfg.IPv6, cfg.BroadbandRetry)
 
