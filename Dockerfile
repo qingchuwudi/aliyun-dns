@@ -1,8 +1,4 @@
-FROM golang:1.15-alpine
-ENV GO111MODULE=on \
-    CGO_ENABLED=0 \
-    GOPROXY="https://goproxy.cn,https://goproxy.io,direct"
-
+FROM golang:1.17.4-alpine
 WORKDIR $GOPATH/src/github.com/aliyun-dns
 ADD . $GOPATH/src/github.com/aliyun-dns
 COPY config.yaml /etc/config.yaml
