@@ -8,7 +8,7 @@
 - [x] 支持IPv4和IPv6同时更新
 - [x] 支持多域名
 - [x] 支持宽带有多个公网IP，或者有多个宽带的情景（比如宽带多拨）
-- [x] 支持缓存，减少网络请求
+- [x] 支持缓存
 - [x] 支持自定义TTL
 - [x] 支持自定义IP检测周期
 - [x] 支持Docker
@@ -69,7 +69,7 @@ go build .
 ### 2.2、Docker运行
 
 ```bash
-docker run --name=aliyun-dns --restart=unless-stopped --net=host -v /etc/alidns-config.yaml:/etc/config.yaml -d qingchuwudi/aliyun-dns:v2.1.0
+docker run --name=aliyun-dns --restart=unless-stopped --net=host -v /etc/alidns-config.yaml:/etc/config.yaml -d qingchuwudi/aliyun-dns:v2.1.1
 ```
 
 **注意：** 
