@@ -69,7 +69,7 @@ go build .
 ### 2.2、Docker运行
 
 ```bash
-docker run --name=aliyun-dns --restart=unless-stopped --net=host -v /etc/alidns-config.yaml:/etc/config.yaml -d qingchuwudi/aliyun-dns:v2.1.1
+docker run --name=aliyun-dns --restart=unless-stopped --net=host -v /etc/alidns-config.yaml:/etc/config.yaml -d qingchuwudi/aliyun-dns:v2.1.2
 ```
 
 **注意：** 
