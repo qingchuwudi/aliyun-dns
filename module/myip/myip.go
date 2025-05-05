@@ -20,7 +20,7 @@
 package myip
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 
@@ -82,7 +82,7 @@ func GetPublishIP(IPCheckUrl string) string {
 		return ""
 	}
 	defer resp.Body.Close()
-	content, _ := ioutil.ReadAll(resp.Body)
+	content, _ := io.ReadAll(resp.Body)
 	ip1 := strings.Replace(string(content), "\n", "", -1)
 	ip2 := strings.Replace(ip1, "\r", "", -1)
 	return ip2

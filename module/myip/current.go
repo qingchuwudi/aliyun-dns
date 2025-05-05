@@ -20,8 +20,9 @@
 package myip
 
 import (
-	"aliyun-dns/config"
 	alidns "github.com/alibabacloud-go/alidns-20150109/client"
+
+	"aliyun-dns/config"
 )
 
 // 当前使用的ip的缓存
