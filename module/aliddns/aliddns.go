@@ -25,6 +25,7 @@ import (
 	"github.com/alibabacloud-go/alidns-20150109/client"
 	aliCliSdk "github.com/alibabacloud-go/darabonba-openapi/client"
 	"github.com/alibabacloud-go/tea/tea"
+	"go.uber.org/zap"
 
 	myConfig "aliyun-dns/config"
 	"aliyun-dns/module/loger"
@@ -54,13 +55,13 @@ func Run(ctx context.Context, cfg *myConfig.Config, cli client.Client) {
 			if (PubIPv4 != "") && (customer.IPv4RR != "") {
 				err := UpdateDomains(cli, nil, customer.IPv4RR, customer.Domain, PubIPv4, myConfig.IPv4Type, cfg.TTL)
 				if err != nil {
-					loger.Error("IPv4 update failed : %s", err.Error())
+					loger.Error("IPv4 update failed", zap.Error(err))
 				}
 			}
 			if (PubIPv6 != "") && (customer.IPv6RR != "") {
 				err := UpdateDomains(cli, nil, customer.IPv6RR, customer.Domain, PubIPv6, myConfig.IPv6Type, cfg.TTL)
 				if err != nil {
-					loger.Error("IPv6 update failed : %s", err.Error())
+					loger.Error("IPv6 update failed", zap.Error(err))
 				}
 			}
 		}
@@ -82,14 +83,14 @@ func RunOnMultiBroadband(ctx context.Context, cfg *myConfig.Config, cli client.C
 				IP := myip.BroadbandIPFisrt(broadbandIPv4)
 				err := UpdateDomains(cli, broadbandIPv4, customer.IPv4RR, customer.Domain, IP, myConfig.IPv4Type, cfg.TTL)
 				if err != nil {
-					loger.Error("update IPv4 failed : %s", err.Error())
+					loger.Error("update IPv4 failed", zap.Error(err))
 				}
 			}
 			if broadbandIPv6 != nil {
 				IP := myip.BroadbandIPFisrt(broadbandIPv6)
 				err := UpdateDomains(cli, broadbandIPv6, customer.IPv6RR, customer.Domain, IP, myConfig.IPv6Type, cfg.TTL)
 				if err != nil {
-					loger.Error("update IPv6 failed : %s", err.Error())
+					loger.Error("update IPv6 failed", zap.Error(err))
 				}
 			}
 		}

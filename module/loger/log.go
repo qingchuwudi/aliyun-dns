@@ -45,12 +45,12 @@ var (
 	// Warn  = Loger.Warnf
 	// Error = Loger.Errorf
 	// Panic = Loger.Panicf
-	Debug func(template string, args ...interface{}) // debug日志
-	Info  func(template string, args ...interface{}) //
-	Warn  func(template string, args ...interface{})
-	Error func(template string, args ...interface{})
-	Fatal func(template string, args ...interface{})
-	Panic func(template string, args ...interface{})
+	Debug func(msg string, keysAndValues ...interface{}) // debug日志
+	Info  func(msg string, keysAndValues ...interface{}) //
+	Warn  func(msg string, keysAndValues ...interface{})
+	Error func(msg string, keysAndValues ...interface{})
+	Fatal func(msg string, keysAndValues ...interface{})
+	Panic func(msg string, keysAndValues ...interface{})
 )
 
 func InitLogger(cfg *LogConfig) {
@@ -63,8 +63,8 @@ func InitLogger(cfg *LogConfig) {
 		CallerKey:     "file",
 		StacktraceKey: "stacktrace",
 		LineEnding:    zapcore.DefaultLineEnding,
-		// EncodeLevel:    zapcore.LowercaseLevelEncoder,
-		EncodeLevel:    zapcore.CapitalLevelEncoder,
+		EncodeLevel:   zapcore.LowercaseLevelEncoder,
+		// EncodeLevel:    zapcore.CapitalLevelEncoder,
 		EncodeTime:     zapcore.ISO8601TimeEncoder,
 		EncodeDuration: zapcore.SecondsDurationEncoder,
 		EncodeCaller:   zapcore.ShortCallerEncoder, // 短路径编码器
@@ -83,9 +83,9 @@ func InitLogger(cfg *LogConfig) {
 
 	// 配置生效
 	core := zapcore.NewCore(
-		// zapcore.NewJSONEncoder(encoderConfig),
+		zapcore.NewJSONEncoder(encoderConfig),
 		// 日志格式默认是Json格式，转为普通格式的日志
-		zapcore.NewConsoleEncoder(encoderConfig),
+		// zapcore.NewConsoleEncoder(encoderConfig),
 		zapcore.NewMultiWriteSyncer(writes...),
 		atomicLevel,
 	)
@@ -105,12 +105,12 @@ func InitLogger(cfg *LogConfig) {
 
 	// 赋值
 	Loger = ZapLoger.Sugar()
-	Debug = Loger.Debugf // debug日志
-	Info = Loger.Infof   //
-	Warn = Loger.Warnf
-	Error = Loger.Errorf
-	Fatal = Loger.Fatalf
-	Panic = Loger.Panicf
+	Debug = Loger.Debugw // debug日志
+	Info = Loger.Infow   //
+	Warn = Loger.Warnw
+	Error = Loger.Errorw
+	Fatal = Loger.Fatalw
+	Panic = Loger.Panicw
 }
 
 // 日志等级

@@ -24,6 +24,8 @@ import (
 	"net/http"
 	"strings"
 
+	"go.uber.org/zap"
+
 	"aliyun-dns/module/loger"
 )
 
@@ -78,7 +80,7 @@ func BroadbandIPFisrt(broadbandIPs map[string]bool) string {
 func GetPublishIP(IPCheckUrl string) string {
 	resp, err := http.Get("http://" + IPCheckUrl)
 	if err != nil {
-		loger.Info("公网IP查询失败 ：%s", err.Error())
+		loger.Info("公网IP查询失败", zap.Error(err))
 		return ""
 	}
 	defer func() { _ = resp.Body.Close() }()

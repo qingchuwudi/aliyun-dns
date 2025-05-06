@@ -24,6 +24,7 @@ import (
 
 	alidns "github.com/alibabacloud-go/alidns-20150109/client"
 	"github.com/alibabacloud-go/tea/tea"
+	"go.uber.org/zap"
 
 	myConfig "aliyun-dns/config"
 	"aliyun-dns/module/aliddns"
@@ -49,7 +50,7 @@ func main() {
 	// 创建客户端
 	cliPtr, err := aliddns.CreateClient(tea.String(cfg.AccessKeyId), tea.String(cfg.AccessKeySecret))
 	if err != nil {
-		loger.Error(err.Error())
+		loger.Error("create client error", zap.Error(err))
 		return
 	}
 	cli := *cliPtr

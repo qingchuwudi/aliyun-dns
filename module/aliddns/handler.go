@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/alibabacloud-go/alidns-20150109/client"
+	"go.uber.org/zap"
 
 	"aliyun-dns/module/loger"
 	"aliyun-dns/module/myip"
@@ -34,7 +35,7 @@ func UpdateDomains(cli client.Client, broadbandIP map[string]bool, DomainRR, Dom
 	cacheKey := myip.CacheKey(subDomain, ipType)
 	if !myip.DoesIPChanged(broadbandIP, cacheKey, IP) {
 		// 没变化，返回
-		loger.Debug("[%s] IP没有发生变化", cacheKey)
+		loger.Debug("ip没有发生变化", zap.String(cacheKey, IP))
 		return nil
 	}
 
@@ -62,7 +63,7 @@ func UpdateDomains(cli client.Client, broadbandIP map[string]bool, DomainRR, Dom
 		if resp != nil && resp.Body != nil {
 			// 更新缓存
 			myip.CurrentCache.Put(cacheKey, IP, *resp.Body.RecordId)
-			loger.Info("添加：[%s] 公网IP已添加: %s", cacheKey, IP)
+			loger.Info("公网IP已添加", zap.String(cacheKey, IP))
 		}
 	} else {
 		// 有记录，更新
@@ -79,7 +80,7 @@ func UpdateDomains(cli client.Client, broadbandIP map[string]bool, DomainRR, Dom
 				if resp != nil && resp.Body != nil {
 					// 更新缓存
 					myip.CurrentCache.Put(cacheKey, IP, *resp.Body.RecordId)
-					loger.Info("更新：已经有相同记录，稍后重试")
+					loger.Info("已经有相同记录，稍后重试")
 				}
 				return nil
 			}
@@ -88,7 +89,7 @@ func UpdateDomains(cli client.Client, broadbandIP map[string]bool, DomainRR, Dom
 		if resp != nil && resp.Body != nil {
 			// 更新缓存
 			myip.CurrentCache.Put(cacheKey, IP, *resp.Body.RecordId)
-			loger.Info("[%s] 公网IP更新: %s", cacheKey, IP)
+			loger.Info("公网IP更新", zap.String(cacheKey, IP))
 		}
 	}
 
