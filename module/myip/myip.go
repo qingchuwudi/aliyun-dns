@@ -81,11 +81,9 @@ func GetPublishIP(IPCheckUrl string) string {
 		loger.Info("公网IP查询失败 ：%s", err.Error())
 		return ""
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	content, _ := io.ReadAll(resp.Body)
-	ip1 := strings.Replace(string(content), "\n", "", -1)
-	ip2 := strings.Replace(ip1, "\r", "", -1)
-	return ip2
+	return strings.ReplaceAll(string(content), "\n", "")
 }
 
 // 构造缓存的key

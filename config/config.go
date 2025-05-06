@@ -103,7 +103,7 @@ func (c *Config) InitBroadbandRecords() map[string]bool {
 
 // 检查日志配置有效性
 func IsLogValid(l *loger.LogConfig) bool {
-	if !(l.Path == "" || filecheck.IsDir(l.Path)) {
+	if l.Path != "" && !filecheck.IsDir(l.Path) {
 		loger.PreError("日志路径(%s)配置有误：路径不存在或没有权限！", l.Path)
 		return false
 	}

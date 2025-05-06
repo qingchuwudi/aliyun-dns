@@ -20,44 +20,44 @@
 package filecheck
 
 import (
-    "os"
+	"os"
 
-    "aliyun-dns/module/loger"
+	"aliyun-dns/module/loger"
 )
 
 // 判断所给路径文件/文件夹是否存在
 func IsFileValid(file string) bool {
-    stu, err := os.Stat(file) // os.Stat获取文件信息
-    if err != nil {
-        if os.IsExist(err) {
-            return true
-        }
-        loger.PreError("文件 '%s' 不存在或没有权限。", file)
-        return false
-    }
-    if stu.IsDir() {
-        loger.PreError("参数错误，'%s' 是文件夹。", file)
-        return false
-    }
-    return true
+	stu, err := os.Stat(file) // os.Stat获取文件信息
+	if err != nil {
+		if os.IsExist(err) {
+			return true
+		}
+		loger.PreError("文件 '%s' 不存在或没有权限。", file)
+		return false
+	}
+	if stu.IsDir() {
+		loger.PreError("参数错误，'%s' 是文件夹。", file)
+		return false
+	}
+	return true
 }
 
 // 判断所给路径文件/文件夹是否存在
 func IsExist(file string) bool {
-    _, err := os.Stat(file) // os.Stat获取文件信息
-    return os.IsExist(err)
+	_, err := os.Stat(file) // os.Stat获取文件信息
+	return os.IsExist(err)
 }
 
 // 判断所给路径是否为文件夹
 func IsDir(path string) bool {
-    s, err := os.Stat(path)
-    if err != nil {
-        return false
-    }
-    return s.IsDir()
+	s, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+	return s.IsDir()
 }
 
 // 判断所给路径是否为文件
 func IsFile(path string) bool {
-    return !IsDir(path)
+	return !IsDir(path)
 }

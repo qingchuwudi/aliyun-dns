@@ -115,7 +115,7 @@ func (c *LocalCache) RecordsToCache(cli alidns.Client, subDomain *string) {
 // 判断ip是否发生变动
 // 通过nslooup查询当前域名的IP，并和新的公网IP做对比
 func DoesIPChanged(broadbandIP map[string]bool, cacheKey, ip string) bool {
-	if broadbandIP != nil && len(broadbandIP) > 0 && broadbandIP[CurrentCache.GetIp(cacheKey)] {
+	if len(broadbandIP) > 0 && broadbandIP[CurrentCache.GetIp(cacheKey)] {
 		// 宽带多播时，通过key在缓存中查询ip，并与当前多播结果对比
 		return false
 	} else {
